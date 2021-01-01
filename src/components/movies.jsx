@@ -7,6 +7,7 @@ import ListGroup from './common/listGroup'
 import { getGenres } from '../services/fakeGenreService'
 import MoviesTable from './moviesTable'
 import _ from 'lodash'
+import Search from './common/search'
 
 class Movies extends Component {
   state = {
@@ -14,8 +15,9 @@ class Movies extends Component {
     pageSize: 4,
     currentPage: 1,
     genres: [],
-    selectedGenre: 0,
+    selectedGenre: null,
     sortColumn: { path: 'title', order: 'asc' },
+    searchTerm: ''
   }
 
   componentDidMount() {
@@ -47,19 +49,35 @@ class Movies extends Component {
   }
 
   handleGenreSelect = genre => {
-    this.setState({ selectedGenre: genre, currentPage: 1 })
+    const searchTerm = ''    
+    this.setState({ searchTerm, selectedGenre: genre, currentPage: 1 })
   }
 
   handleSort = sortColumn => {
     this.setState({ sortColumn })
   }
 
+  handleSearch = (event) => {
+    console.log('search', event.target.value)
+    const searchTerm = event.target.value
+    this.setState({ searchTerm, currentPage: 1})
+
+    if (event.target.value > 0) {
+      const selectedGenre = null
+      this.setState({selectedGenre})
+    }    
+  }
+
   getPageData = () => {
-    const filtered =
+    let filtered =
     this.state.selectedGenre && this.state.selectedGenre._id
         ? this.state.movies.filter(m => m.genre._id === this.state.selectedGenre._id)
         : this.state.movies
 
+    filtered = this.state.searchTerm.length > 0
+        ? this.state.movies.filter(m => m.title.toLowerCase().includes(this.state.searchTerm.toLowerCase()))
+        : this.state.movies
+    
     const sorted = _.orderBy(filtered, [this.state.sortColumn.path], [this.state.sortColumn.order])
 
     const movies = paginate(sorted, this.state.currentPage, this.state.pageSize)
@@ -87,6 +105,7 @@ class Movies extends Component {
         <div className="col-9">
           <Link to="/movies/new" className="btn btn-sm btn-primary mb-3">New Movie</Link>
           <p>Showing {totalCount} movies in the database.</p>
+          <Search value={this.state.searchTerm} onChange={this.handleSearch}/>
           <MoviesTable
             movies={movies}
             sortColumn={sortColumn}
