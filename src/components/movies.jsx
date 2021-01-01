@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-import { getMovies } from '../services/fakeMovieService'
+import { Link } from 'react-router-dom'
+import { getMovies, deleteMovie } from '../services/fakeMovieService'
 import Pagination from './common/pagination'
 import { paginate } from '../utils/paginate'
 import ListGroup from './common/listGroup'
@@ -18,6 +19,7 @@ class Movies extends Component {
   }
 
   componentDidMount() {
+    console.log('mounted')
     const genres = [{ name: 'All Genres' }, ...getGenres()]
     this.setState({
       movies: getMovies(),
@@ -26,6 +28,7 @@ class Movies extends Component {
   }
 
   handleDelete = movie => {
+    deleteMovie(movie._id)
     const movies = this.state.movies.filter(m => m._id !== movie._id)
     this.setState({ movies: movies })
   }
@@ -82,6 +85,7 @@ class Movies extends Component {
           />
         </div>
         <div className="col-9">
+          <Link to="/movies/new" className="btn btn-sm btn-primary mb-3">New Movie</Link>
           <p>Showing {totalCount} movies in the database.</p>
           <MoviesTable
             movies={movies}
